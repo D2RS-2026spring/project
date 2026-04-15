@@ -6,7 +6,7 @@
 * 王羿人   | 学号：2025303120134 [@WYR1016](https://github.com/WYR1016)
 * 潘钰烁   | 学号：2025303120124 [@tzy311](https://github.com/tzy311)
 * 贾雯偲   | 学号：2025303120143 [@Ccwwjia-032](https://github.com/Ccwwjia-032)
-* 刘壮壮   | 学号：2025303110049 [@Leo-hub123](https://github.com/Leo-hub123) 
+* 刘壮壮   | 学号：2025303110049 [@Leo-hub123](https://github.com/Leo-hub123)   
  
 
 
