@@ -13,7 +13,7 @@
 ## 项目内容
 
 *该论文发表在 2023 年的 WRR 杂志上，SU et al.Tracing the Soil Water Flux in Variably Saturated Zones Using Temperature.Water Resources Research 10 April 2023. Data DOI10.1029/2022WR033677
-*https://github.com/flovar/flovar
+* https://d2rs-2026spring.github.io/project/
 
 * 原始数据:https://doi.org/10.5281/zenodo.7456823
 
