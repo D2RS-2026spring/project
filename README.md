@@ -12,8 +12,7 @@
 
 ## 项目内容
 
-*该论文发表在 2023 年的 WRR 杂志上，SU et al.Tracing the Soil Water Flux in Variably Saturated Zones Using Temperature.Water Resources Research 10 April 2023. Data DOI10.1029/2022WR033677
-* https://d2rs-2026spring.github.io/project/
+该论文发表在 2023 年的 WRR 杂志上，SU et al.Tracing the Soil Water Flux in Variably Saturated Zones Using Temperature.Water Resources Research 10 April 2023. Data DOI10.1029/2022WR033677
 
 * 原始数据:https://doi.org/10.5281/zenodo.7456823
 
@@ -23,7 +22,7 @@
 
 ## 论文内容
 
-*研究背景：
+* 研究背景：
 包气带（Variably saturated zone）是连接地表水和地下水的关键纽带。准确量化其中的水通量对于理解水循环和污染物迁移至关重要。虽然热示踪法在饱和带（如河床）已广泛应用，但在非饱和带，由于含水率变化导致土壤热性质（热容、热导率）动态波动，现有的稳态或简单解析解方法往往难以适用。
 
 * 创新：
