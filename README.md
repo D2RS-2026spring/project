@@ -59,9 +59,9 @@
 2、在终端中运行以下命令：cd D:\project 进入文件夹
 
 3、在终端中运行以下命令：python main.py <path to csv data file> <depth of sensor 1 and 2 relative to sensor 0 in meters> <time duration between two data records in seconds> --cp<heat capacity of moist soil>
-例如：python main.py data.csv 0.25 0.5 1800 --freq 48 --dx 0.01 --cw 3.6e6 --cv 90 --cp 2.8e6 --optim tnc --loss_coef 0.9 0.05 0.05--seed 9000 --filter_outputs
+例如：python main.py data.csv 0.25 0.5 1800 --freq 48 --dx 0.01 --cw 3.6e6 --cv 90 --cp 2.8e6 --optim tnc --loss_coef 0.9 0.05 0.05 --seed 9000 --filter_outputs
 
-4、输出文件是一个压缩的.npz归档文件，其中包含以下优化参数：lambdas: at each discretized nodes, flux: Liquid water flux, vflux: Vapor flux, 
+4、终端会输出水流通量与水汽通量，输出文件是一个压缩的.npz归档文件，其中包含以下优化参数：lambdas: at each discretized nodes, flux: Liquid water flux, vflux: Vapor flux, 
 
 
 <img width="880" height="535" alt="Image" src="https://github.com/user-attachments/assets/1230289f-66b6-4c35-8438-12aba1c98488" />
