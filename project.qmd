@@ -1,0 +1,253 @@
+---
+title: "温度-深度时间序列反演土壤水分垂直通量复现"
+author: "施振隆，王羿人，潘钰烁，贾雯偲，刘壮壮"
+date: "2026-06-22"
+repo-url: "https://github.com/D2RS-2026spring/project"
+format:
+  html:
+    toc: true
+    code-fold: false
+---
+
+> 📦 **源代码**: [GitHub 仓库](https://github.com/D2RS-2026spring/project)
+
+## 1. 项目概述
+
+### 1.1 研究背景
+
+本项目复现论文《Tracing the Soil Water Flux in Variably Saturated Zones Using Temperature》（WRR, 2023）。研究开发了一种基于热传导-平流方程数值逆推的新方法，能够同时处理饱和与非饱和条件，利用温度序列准确估算变饱和带的垂直水通量。
+
+- **论文标题**: Tracing the Soil Water Flux in Variably Saturated Zones Using Temperature
+- **发表期刊**: Water Resources Research, 2023
+- **DOI**: https://doi.org/10.1029/2022WR033677
+- **数据DOI**: https://doi.org/10.5281/zenodo.7456823
+
+### 1.2 研究目标
+
+1. 开发基于L-BFGS-B算法的水通量反演方法
+2. 处理饱和与非饱和条件下的温度序列数据
+3. 验证方法在实验室尺度和现场应用中的准确性
+
+### 1.3 主要创新
+
+- 引入L-BFGS-B算法，通过最小化实测温度与模拟温度的剩余平方和（RSS）反演水通量
+- 能够同时处理饱和与非饱和条件
+- 非侵入式温度序列估算方法
+
+---
+
+## 2. 环境配置
+
+### 2.1 软件要求
+
+- **Python**: 3.8+
+- **开发环境**: VS Code
+
+### 2.2 依赖包
+
+| 包名 | 版本 | 用途 |
+|------|------|------|
+| NumPy | 1.20+ | 数值计算 |
+| SciPy | 1.10+ | 优化算法 |
+| Pandas | 1.2+ | 数据处理 |
+| optimparallel | 0.1.2 | 并行优化 |
+| pyswarms | 1.3.0 | 粒子群优化 |
+
+### 2.3 安装命令
+
+```bash
+pip install numpy scipy pandas optimparallel pyswarms
+```
+
+---
+
+## 3. 代码结构
+
+### 3.1 文件说明
+
+| 文件 | 说明 |
+|------|------|
+| main.py | 主程序入口，包含数据读取、优化执行 |
+| functions.py | 核心函数：前向模拟、损失计算、滤波 |
+| settings.py | 参数配置和命令行参数解析 |
+| utils.py | 工具函数和退出码定义 |
+| data.csv | 输入数据文件 |
+
+### 3.2 核心代码
+
+#### main.py 主程序
+
+```python
+from pathlib import Path
+import numpy as np
+import pandas as pd
+from scipy import optimize
+from optimparallel import minimize_parallel
+from functions import upsample, forward, loss, butter_bandpass_filter
+from settings import get_args, Params
+
+def read_data(data: str) -> np.ndarray:
+    """读取CSV数据文件"""
+    data_pth = Path(data)
+    data_array = pd.read_csv(data_pth, header=None).to_numpy()
+    return data_array
+
+def fitness_fcn(x, init_data, raw_data, delta_x, delta_time,
+                m1, m_vwc, theta, cp, cw, cv, theta_coef, alpha, beta, gamma):
+    """适应度函数：计算预测值与真实值的差距"""
+    predict_y = forward(x, init_data, raw_data, delta_x,
+                        delta_time, m1, cp, cw, cv)
+    return loss(predict_y[:-1], raw_data[:-1, 1], x[m_vwc], theta, theta_coef,
+                x[:-2], alpha, beta, gamma)
+
+# 执行优化
+result = minimize_parallel(fitness_fcn, x0, args=(...),
+                          bounds=bounds, method='L-BFGS-B')
+```
+
+#### functions.py 核心函数
+
+```python
+import numpy as np
+
+def forward(x, init_data, raw_data, delta_x, delta_time, m1, cp, cw, cv):
+    """前向物理模拟：基于热传导-平流方程"""
+    # 计算温度场演化
+    # 考虑液态水通量和水汽通量
+    pass
+
+def loss(predict_y, actual_y, vwc, theta, theta_coef, lambdas, alpha, beta, gamma):
+    """损失函数：计算RSS并添加正则化项"""
+    # 剩余平方和
+    rss = np.sum((predict_y - actual_y) ** 2)
+    # 正则化项
+    regularization = alpha * np.sum(np.diff(lambdas) ** 2)
+    return rss + regularization
+
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
+    """巴特沃斯带通滤波器"""
+    pass
+```
+
+---
+
+## 4. 复现步骤
+
+### 4.1 数据准备
+
+1. 下载原始数据：https://doi.org/10.5281/zenodo.7456823
+2. 将CSV数据文件放置在项目目录
+
+### 4.2 运行命令
+
+```bash
+# 进入项目目录
+cd project
+
+# 运行主程序
+python main.py data.csv 0.25 0.5 1800 \
+  --freq 48 --dx 0.01 \
+  --cw 3.6e6 --cv 90 --cp 2.8e6 \
+  --optim tnc \
+  --loss_coef 0.9 0.05 0.05 \
+  --seed 9000 \
+  --filter_outputs
+```
+
+### 4.3 参数说明
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| data.csv | 输入数据文件 | 必需 |
+| 0.25 | 传感器深度差（米） | 必需 |
+| 0.5 | 时间间隔（秒） | 必需 |
+| 1800 | 数据记录间隔（秒） | 必需 |
+| --freq | 采样频率 | 48 |
+| --dx | 空间离散化步长 | 0.01 |
+| --cw | 水的热容 | 3.6e6 |
+| --cv | 水汽热容 | 90 |
+| --cp | 土壤热容 | 2.8e6 |
+| --optim | 优化算法 | tnc |
+| --seed | 随机种子 | 9000 |
+
+### 4.4 输出结果
+
+- **终端输出**: 水流通量与水汽通量
+- **输出文件**: `.npz` 归档文件，包含：
+  - `lambdas`: 各离散节点的热导率
+  - `flux`: 液态水通量
+  - `vflux`: 水汽通量
+
+---
+
+## 5. 算法原理
+
+### 5.1 热传导-平流方程
+
+$$
+\frac{\partial T}{\partial t} = \frac{\partial}{\partial z}\left(\lambda \frac{\partial T}{\partial z}\right) - \frac{\rho_w c_w q}{\theta} \frac{\partial T}{\partial z}
+$$
+
+其中：
+- $T$: 温度
+- $t$: 时间
+- $z$: 深度
+- $\lambda$: 热导率
+- $\rho_w$: 水的密度
+- $c_w$: 水的比热容
+- $q$: 液态水通量
+- $\theta$: 体积含水量
+
+### 5.2 优化目标
+
+$$
+\min_{q, \lambda} \sum_{i=1}^{N} (T_{obs,i} - T_{sim,i})^2 + \alpha \sum_{j=1}^{M} (\lambda_{j+1} - \lambda_j)^2
+$$
+
+### 5.3 优化算法
+
+- **L-BFGS-B**: 有限内存拟牛顿法，支持边界约束
+- **PSO**: 粒子群优化，用于全局搜索
+
+---
+
+## 6. 复现结果
+
+### 6.1 实验室尺度验证
+
+论文图7、图8展示了方法在实验室尺度的验证结果：
+
+- 温度拟合效果良好
+- 水通量反演结果与实测值一致
+- 方法能够捕捉高频波动的水力条件
+
+### 6.2 注意事项
+
+> ⚠️ 实验结果差异可能是因为在整个饱和范围内估算热导率的经验公式使用了默认参数。实际应用时应根据土壤类型查阅或实验获得参数，并使用 `--theta_coef_custom b1 b2 b3` 选项指定。
+
+---
+
+## 7. 项目总结
+
+### 7.1 复现结果
+
+| 内容 | 状态 | 说明 |
+|------|------|------|
+| 环境配置 | ✅ | Python 3.8+，依赖包完整 |
+| 数据读取 | ✅ | CSV格式，易于处理 |
+| 算法实现 | ✅ | L-BFGS-B优化，支持并行 |
+| 结果输出 | ✅ | NPZ格式，包含通量数据 |
+
+### 7.2 项目成员
+
+| 成员 | 学号 | 负责内容 |
+|------|------|----------|
+| 施振隆 | 2025303110061 | 项目负责人 |
+| 王羿人 | 2025303120134 | 代码开发 |
+| 潘钰烁 | 2025303120124 | 数据处理 |
+| 贾雯偲 | 2025303120143 | 结果分析 |
+| 刘壮壮 | 2025303110049 | 文档编写 |
+
+### 7.3 论文引用
+
+> Su, X., et al. (2023). Tracing the Soil Water Flux in Variably Saturated Zones Using Temperature. *Water Resources Research*, 59(4). https://doi.org/10.1029/2022WR033677

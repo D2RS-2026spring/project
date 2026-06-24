@@ -1,0 +1,5 @@
+_book/
+*.html
+*.knit.md
+*_files/
+__pycache__/
